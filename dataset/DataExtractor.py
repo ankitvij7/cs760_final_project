@@ -12,7 +12,7 @@ moods = ["Happy music",
           "Scary music"]
 
 
-def find_labels():
+def find_labels(segment_file):
     with open('class_labels_indices.csv', 'r') as csvfile:
         reader = csv.reader(csvfile)
         # get the index and mid for each mood we're interested in
@@ -23,7 +23,7 @@ def find_labels():
 
     # get which files we need to look for for each label
     ln = 0
-    with open('balanced_train_segments.csv', 'r') as csvfile:
+    with open(segment_file, 'r') as csvfile:
         reader = csv.reader(csvfile)
         for row in reader:
             ln += 1
@@ -58,17 +58,17 @@ def get_records_from(filename, label):
         
     return ret
 
-def build_tfrecords_for_moods():
+def build_tfrecords_for_moods(infile, outfile, dataloc):
     print("Building tfrecords...")
-    labels = find_labels()
+    labels = find_labels(infile)
     # for each mood, open the files and extract the features with the indices
     # matching that mood.
     # write all the features for the current mood to one file.
     sess = tf.Session()
-    prefix = "audioset_v1_embeddings/bal_train/"
-    for m in moods:
-        cnt = 0
-        with tf.python_io.TFRecordWriter(m + "_balanced_train.tfrecord") as writer:
+    prefix = dataloc
+    cnt = 0
+    with tf.python_io.TFRecordWriter(outfile) as writer:
+        for m in moods:
             fnames = set()
             for vid in labels[m][2]: # all the video ids for this mood
                 fnames.add(vid[0:2] + ".tfrecord") # don't duplicate filenames if file has 2 features of this mood
@@ -77,6 +77,9 @@ def build_tfrecords_for_moods():
                 cnt += len(recs)
                 for r in recs:
                     writer.write(r.SerializeToString())
-        print("Saved %d records into mood '%s'" % (cnt, m))
-print(moods)
-#build_tfrecords_for_moods()
+    print("Saved %d records into '%s'" % (cnt, outfile))
+
+def do_it():
+    print(moods)
+    build_tfrecords_for_moods('balanced_train_segments.csv', 'moods_balanced_subset.tfrecord', 'audioset_v1_embeddings/bal_train/')
+    build_tfrecords_for_moods('unbalanced_train_segments.csv', 'moods_unbalanced_subset.tfrecord', 'audioset_v1_embeddings/unbal_train/')
