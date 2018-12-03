@@ -7,18 +7,20 @@ from keras.models import Sequential
 from keras.layers import Dense, BatchNormalization, Flatten, Dropout
 from keras.layers import LSTM, MaxPooling1D, Conv1D
 from keras import regularizers
+import sklearn.metrics
 
-plt.rcParams['figure.figsize'] = (12,8)
+# validation set will be 10% of total set
+CV_frac = 0.1
 
 # comment out/in the labels you'd like to be filtered from the input and the classification
 mood_labels = {
     276: "Happy music",
-    # 277: "Funny music",
+    #277: "Funny music",
     278: "Sad music",
-    # 279: "Tender music",
-    # 280: "Exciting music",
+    #279: "Tender music",
+    #280: "Exciting music",
     281: "Angry music",
-    # 282: "Scary music",
+    282: "Scary music",
 }
 # build mapping of moods indices to 0-based indices
 mood_labels_to_ordinals = dict()
@@ -53,7 +55,7 @@ def extract_record_to_xy(record):
     return audio_frame, y
 
 
-def data_generator(batch_size, records_in, start_frac=0, end_frac=1):
+def data_generator(batch_size, records, start_frac=0, end_frac=1):
     '''
     Shuffles the Audioset training data and returns a generator of training data and one-hot mood labels
     batch_size: batch size for each set of training data and labels
@@ -62,7 +64,6 @@ def data_generator(batch_size, records_in, start_frac=0, end_frac=1):
     end_frac: the ending point of the data set to use, as a fraction of total record length (used for CV)
     '''
     max_len = 10
-    records = records_in[int(start_frac * len(records_in)):int(end_frac * len(records_in))]
     num_recs = len(records)
     shuffle = np.random.permutation(range(num_recs))
     num_batches = num_recs // batch_size - 1
@@ -183,22 +184,15 @@ def nn_model():
                   metrics=['accuracy'])
     return (model, '2-layer NN')
 
-def print_label_stats(name, generator, num_recs):
+def print_label_stats(name, records):
     ''' prints the statistical breakdown of training and validation sets '''
     ret = dict()
     for m in mood_ordinals_to_labels.keys():
         ret[m] = 0
 
-    tot = 0
-    for recs in generator:
-        for y in recs[1]:
-            mood_bin = y.argmax()
-            ret[mood_bin] += 1
-            tot += 1
-            if tot == num_recs:
-                break
-        if tot == num_recs:
-            break
+    tot = len(records)
+    for rec in records:
+        ret[rec[1]] += 1
 
     print(name + ' stats:')
     for m in ret.keys():
@@ -206,51 +200,100 @@ def print_label_stats(name, generator, num_recs):
         print(' %15s: %6d (%.3f)' % (mood_labels[mood_ordinals_to_labels[m]], v, v / tot))
     print(' %15s: %6d (%.3f)\n' % ('total', tot, tot / tot))
 
-
-def train_model(model, tf_infile, batch_size_train, batch_size_validate, epochs, model_outfile):
+def train_model(model, train_records, validate_records, batch_size_train, batch_size_validate, epochs):
     ''' Perform learning on the records in tf_infile, using 90/10 cross validation
-        model - tuple (keras model to train, string_name_of_model)
-        tf_infile - input filename
+        model - keras model to train
+        train_records - instances to train with
+        validate_records - instances to valiate with
         batch_size_train - size of batches for training sets
         batch_size_validate - size of batches for validation
         epochs - number of epochs to run
-        model_outfile - filename to save the resulting learned model to
     '''
-    # validation set will be 10% of total set
-    CV_frac = 0.1
 
+    # learn the model
+    num_classes = len(mood_labels)
+    num_train_recs = len(train_records)
+    num_val_recs = len(validate_records)
+    num_recs = num_train_recs + num_val_recs
+    validation_data = (np.asarray([r[0] for r in validate_records]),
+                       np.asarray([keras.utils.to_categorical(r[1], num_classes) for r in validate_records]))
+    history = model.fit(x=np.asarray([r[0] for r in train_records]),
+                        y=np.asarray([keras.utils.to_categorical(r[1], num_classes) for r in train_records]),
+                        batch_size=batch_size_train,  
+                        epochs=epochs,
+                        verbose=1,
+                        validation_data=validation_data)
+    return (model, history)
+
+def plot_epochs(history, title):
+    # plot the results
+    plt.rcParams['figure.figsize'] = (12,8)
+    plt.plot(history.history['acc'], label='training accuracy')
+    plt.plot(history.history['val_acc'], label='validation accuracy')
+    plt.legend()
+    plt.xlabel("epochs")
+    plt.ylabel("accuracy")
+    plt.title(title)
+    plt.show()
+
+
+def load_records(tf_infile):
     # load the records
+    print("Loading records from '" + tf_infile + "'...")
     records = []
     for t in tf.python_io.tf_record_iterator(tf_infile):
         r = extract_record_to_xy(t)
         if r:
             records.append(r)
-    num_recs = len(records)
+    print("Loaded %d records" % len(records))
+    return records
 
-    # create generators for the training and validation sets
-    train_gen = data_generator(batch_size_train, records, 0, 1 - CV_frac)
-    val_gen = data_generator(batch_size_validate, records, 1 - CV_frac, 1)
+def show_confusion_matrix(model, records):
+    predictions = model.predict_on_batch(np.asarray([r[0] for r in records]))
+    conf = sklearn.metrics.confusion_matrix([r[1] for r in records], [np.argmax(p) for p in predictions])
+    print("Confusion matrix:")
+    print(conf)
+    conf = conf / len(records)
+    print(conf)
 
-    print_label_stats("train", data_generator(batch_size_train, records, 0, 1 - CV_frac), int(num_recs * (1 - CV_frac)))
-    print_label_stats("validate", data_generator(batch_size_train, records, 0, 1 - CV_frac), int(num_recs * CV_frac))
-
-    # learn the model
-    lr_h = model[0].fit_generator(train_gen,steps_per_epoch=int(num_recs * (1 - CV_frac)) // batch_size_train, 
-                                  epochs=epochs, 
-                                  validation_data=val_gen, 
-                                  validation_steps=int(num_recs * CV_frac) // batch_size_validate,
-                                  verbose=1)
-    # plot the results
-    plt.plot(lr_h.history['acc'], label='training accuracy')
-    plt.plot(lr_h.history['val_acc'], label='validation accuracy')
-    plt.legend()
-    plt.xlabel("epochs")
-    plt.ylabel("accuracy")
-    plt.title(model[1] + ' (n=' + str(num_recs) + ')')
-    plt.show()
-    model[0].save('Models/' + model[1] + '_' + str(num_recs) + '.h5')
 
 def main():
+
+    # choose an input file by commenting in/out
+    input_file = 'moods_unbalanced_subset_15615recs.tfrecord'
+    #input_file = 'moods_balanced_subset_401recs.tfrecord'
+
+
+    records = load_records(input_file)
+    num_records = len(records)
+
+    split = int((1-CV_frac) * num_records)
+    train_records = records[0:split]
+    validate_records = records[split:-1]
+
+    print_label_stats("train", train_records)
+    print_label_stats("validate", validate_records)
+
+    # train, or load model...comment out/in as desired.
+    train = True
+    if train:
+        # pick a model by changing the function on the next line
+        #(model, title) = logistic_regression_model() 
+        #(model, title) = lstm_1layer_model() 
+        (model, title) = lstm_3layer_model() 
+        #(model, title) = nn_model() 
+        (model, history) = train_model(model, train_records, validate_records, 32, min(len(validate_records), 128), 60)
+        model.save(title + '_most_recent.h5')
+    else:
+        infile = '3-layer LSTM_most_recent.h5'
+        print("Loading model: " + infile)
+        model = keras.models.load_model(infile)
+
+    show_confusion_matrix(model, validate_records)
+
+    if train:
+        plot_epochs(history, title)
+
     # Un-comment the model you are interested in...
 
     # logistic regression, small balanced data set:
@@ -266,7 +309,7 @@ def main():
     # LSTM 3-layer, small balanced data set:
     #train_model(lstm_3layer_model(), 'moods_balanced_subset_401recs.tfrecord', 20, 10, 200, 'Models/LSTM3_401_20_20_100.h5')
     # LSTM 3-layer, large unbalanced data set:
-    train_model(lstm_3layer_model(), 'moods_unbalanced_subset_15615recs.tfrecord', 32, 128, 100, 'Models/LSTM3_15615_32_128_30.h5')
+    #train_model(lstm_3layer_model(), 'moods_unbalanced_subset_15615recs.tfrecord', 32, 128, 100, 'Models/LSTM3_15615_32_128_30.h5')
 
     # NN, small balanced data set:
     #train_model(nn_model(), 'moods_balanced_subset_401recs.tfrecord', 32, 10, 250, 'Models/NN_401_20_20_100.h5')
@@ -275,26 +318,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-    # used this once to shuffle the order of the records in the data sets and resave them.
-    #filter_resave('moods_balanced_subset_401recs.tfrecord', 'moods_balanced_subset_401recs_filtered.tfrecord')
-    #filter_resave('moods_unbalanced_subset_15615recs.tfrecord', 'moods_unbalanced_subset_15615recs_filtered.tfrecord')
-
-#def filter_resave(infile, outfile):
-#    ''' Used ONCE to filter out records that had multiple moods, now saved just in case I need it later '''
-#    sess = tf.Session()
-#    cnt = 0
-#    skipped = 0
-#    with tf.python_io.TFRecordWriter(outfile) as writer:
-#        ri = tf.python_io.tf_record_iterator(path=infile)
-#        for string_record in ri: 
-#            tf_rec= tf.train.SequenceExample.FromString(string_record)
-#            example_label = list(np.asarray(tf_rec.context.feature['labels'].int64_list.value))
-#            moods = intersection(example_label, mood_labels.keys()) # assume there'll always be a valid label.
-#            ln = len(moods)
-#            if (ln == 1):
-#                writer.write(string_record)
-#                cnt += 1
-#            else:
-#                skipped += 1
-#    print("Saved %d records (skipped %d) into '%s'" % (cnt, skipped, outfile))
 
