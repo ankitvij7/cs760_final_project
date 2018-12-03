@@ -102,3 +102,13 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+#pycharm directories
+.idea/
+
+#Large files from the google data set.
+dataset/eval_segments.csv
+dataset/balanced_train_segments.csv
+dataset/unbalanced_train_segments.csv
+dataset/features.tar.gz
+dataset/audioset_v1_embeddings/
