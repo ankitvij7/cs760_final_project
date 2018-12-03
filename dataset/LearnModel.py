@@ -54,38 +54,6 @@ def extract_record_to_xy(record):
     audio_frame += pad
     return audio_frame, y
 
-
-def data_generator(batch_size, records, start_frac=0, end_frac=1):
-    '''
-    Shuffles the Audioset training data and returns a generator of training data and one-hot mood labels
-    batch_size: batch size for each set of training data and labels
-    records_in: array of tfrecords to dish out
-    start_frac: the starting point of the data set to use, as a fraction of total record length (used for CV)
-    end_frac: the ending point of the data set to use, as a fraction of total record length (used for CV)
-    '''
-    max_len = 10
-    num_recs = len(records)
-    shuffle = np.random.permutation(range(num_recs))
-    num_batches = num_recs // batch_size - 1
-    j = 0
-
-    while True:
-        X = []
-        y = []
-        for idx in shuffle[j * batch_size:(j + 1) * batch_size]:
-            example = records[idx]
-            X.append(records[idx][0])
-            y.append(records[idx][1])
-
-        j += 1
-        if j >= num_batches:
-            shuffle = np.random.permutation(range(num_recs))
-            j = 0
-
-        X = np.array(X)
-        y = keras.utils.to_categorical(y, num_classes=len(mood_labels))
-        yield X, y
-
 def logistic_regression_model():
     ''' Creates a logistic regression model. Used by train_model '''
     lr_model = Sequential()
