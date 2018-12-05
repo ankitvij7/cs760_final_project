@@ -108,7 +108,21 @@ venv.bak/
 
 #Large files from the google data set.
 dataset/eval_segments.csv
+dataset/class_labels_indices.csv
 dataset/balanced_train_segments.csv
 dataset/unbalanced_train_segments.csv
 dataset/features.tar.gz
 dataset/audioset_v1_embeddings/
+
+#Data Set Files that have not been filtered
+dataset/moods_balanced_subset.param
+dataset/moods_balanced_subset.tfrecord
+dataset/moods_balanced_subset_error.txt
+dataset/moods_unbalanced_subset.param
+dataset/moods_unbalanced_subset.tfrecord
+dataset/moods_unbalanced_subset_error.txt
+
+#Tools used for download
+dataset/ffmpeg.exe
+dataset/ffprobe.exe
+

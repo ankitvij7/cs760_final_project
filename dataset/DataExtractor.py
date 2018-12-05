@@ -4,27 +4,29 @@ import numpy as np
 import tensorflow as tf
 
 moods = ["Happy music",
-          "Funny music",
-          "Sad music",
-          "Tender music",
-          "Exciting music",
-          "Angry music",
-          "Scary music"]
+         "Funny music",
+         "Sad music",
+         "Tender music",
+         "Exciting music",
+         "Angry music",
+         "Scary music"]
 
 
-def find_labels(segment_file):
+def find_labels(segment_file, outfile):
+    suffix_param = '.param'
     with open('class_labels_indices.csv', 'r') as csvfile:
         reader = csv.reader(csvfile)
         # get the index and mid for each mood we're interested in
         labels = {}
         for row in reader:
             if (row[2].strip('"') in moods):
-                labels[row[2]] = [int(row[0]), row[1], []] 
+                labels[row[2]] = [int(row[0]), row[1], []]
 
-    # get which files we need to look for for each label
+                # get which files we need to look for for each label
     ln = 0
-    with open(segment_file, 'r') as csvfile:
-        reader = csv.reader(csvfile)
+    with open(segment_file, 'r') as csvfile, open(outfile + suffix_param, 'w', newline='') as outfile_csv:
+        reader = csv.reader(csvfile, quotechar='"', delimiter=',', quoting=csv.QUOTE_ALL, skipinitialspace=True)
+        writer = csv.writer(outfile_csv, delimiter=' ', lineterminator='\n')
         for row in reader:
             ln += 1
             if ln == 137:
@@ -32,12 +34,14 @@ def find_labels(segment_file):
             if len(row) < 4:
                 continue
             for lbl in moods:
-                for n in range(3,len(row)):
+                for n in range(3, len(row)):
                     if row[n].find(labels[lbl][1]) >= 0:
                         labels[lbl][2].append(row[0])
+                        writer.writerow(row[0:3])
     for m in moods:
         print("'%s' is id %d and is found in %d files" % (m, int(labels[m][0]), len(labels[m][2])))
     return labels
+
 
 def get_records_from(filename, label):
     if not os.path.isfile(filename):
@@ -47,39 +51,42 @@ def get_records_from(filename, label):
     ri = tf.python_io.tf_record_iterator(path=filename)
     n = 1
     ret = []
-    for string_record in ri: 
+    for string_record in ri:
         n += 1
 
         tf_example = tf.train.SequenceExample.FromString(string_record)
-        vid_id = tf_example.context.feature['video_id'].bytes_list.value[0].decode(encoding = 'UTF-8')
+        vid_id = tf_example.context.feature['video_id'].bytes_list.value[0].decode(encoding='UTF-8')
         example_label = list(np.asarray(tf_example.context.feature['labels'].int64_list.value))
         if (label in example_label):
             ret.append(tf_example)
-        
+
     return ret
 
-def build_tfrecords_for_moods(infile, outfile, dataloc):
+
+def build_files_for_moods(infile, outfile, dataloc):
     print("Building tfrecords...")
-    labels = find_labels(infile)
+    suffix_tfr = '.tfrecord'
+    labels = find_labels(infile, outfile)
     # for each mood, open the files and extract the features with the indices
     # matching that mood.
     # write all the features for the current mood to one file.
     sess = tf.Session()
     prefix = dataloc
     cnt = 0
-    with tf.python_io.TFRecordWriter(outfile) as writer:
+    with tf.python_io.TFRecordWriter(outfile + suffix_tfr) as writer:
         for m in moods:
             fnames = set()
-            for vid in labels[m][2]: # all the video ids for this mood
-                fnames.add(vid[0:2] + ".tfrecord") # don't duplicate filenames if file has 2 features of this mood
+            for vid in labels[m][2]:  # all the video ids for this mood
+                fnames.add(vid[0:2] + ".tfrecord")  # don't duplicate filenames if file has 2 features of this mood
             for fname in fnames:
                 recs = get_records_from(prefix + fname, labels[m][0])
                 cnt += len(recs)
                 for r in recs:
                     writer.write(r.SerializeToString())
-    print("Saved %d records into '%s'" % (cnt, outfile))
+    print("Saved %d records into '%s'" % (cnt, outfile + suffix_tfr))
 
-def do_it():
-    print(moods)
-    build_tfrecords_for_moods('balanced_train_segments.csv', 'moods_balanced_subset.tfrecord', 'audioset_v1_embeddings/bal_train/')
-    build_tfrecords_for_moods('unbalanced_train_segments.csv', 'moods_unbalanced_subset.tfrecord', 'audioset_v1_embeddings/unbal_train/')
+
+# def do_it():
+print(moods)
+build_files_for_moods('balanced_train_segments.csv', 'moods_balanced_subset', 'audioset_v1_embeddings/bal_train/')
+build_files_for_moods('unbalanced_train_segments.csv', 'moods_unbalanced_subset', 'audioset_v1_embeddings/unbal_train/')
