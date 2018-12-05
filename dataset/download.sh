@@ -7,7 +7,7 @@ fetch_clip() {
   echo "Fetching $1 ..."
   outname="$1_$2"
   echo "Building $outname"
-  if [ -f "output/${outname}.wav.gz" ]; then
+  if [ -f "wav_outputs/${outname}.wav.gz" ]; then
     echo "Already have it."
     return
   fi
@@ -19,13 +19,13 @@ fetch_clip() {
     # If we don't pipe `yes`, ffmpeg seems to steal a
     # character from stdin. I have no idea why.
     echo "Extracting $2 to $3 ..."
-    yes | ./ffmpeg.exe -loglevel quiet -i "./$outname.wav" -ar $SAMPLE_RATE \
+    yes | ffmpeg -loglevel quiet -i "./$outname.wav" -ar $SAMPLE_RATE \
       -ss "$2" -to "$3" "./${outname}_out.wav"
     rm -f "./$outname.wav"
     mv "./${outname}_out.wav" "./$outname.wav"
     echo "Compressing $outname.wav ..."
     gzip "./$outname.wav"
-    mv "./$outname.wav.gz" "./output/$outname.wav.gz"
+    mv "./$outname.wav.gz" "./wav_outputs/$outname.wav.gz"
   else
     # Give the user a chance to Ctrl+C.
     sleep 1
