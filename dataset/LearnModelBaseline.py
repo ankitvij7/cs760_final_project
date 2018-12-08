@@ -12,14 +12,13 @@ import sklearn.metrics
 
 # validation set will be 10% of total set
 CV_frac = 0.1
-
-# comment out/in the labels you'd like to be filtered from the input and the classification
+# comment out/in the labels you'd like to be filtered from the input and the#
+# classification
+# comment out/in the labels you'd like to be filtered from the input and the
+# classification
 mood_labels = {
     276: "Happy music",
-    #277: "Funny music",
     278: "Sad music",
-    #279: "Tender music",
-    #280: "Exciting music",
     281: "Angry music",
     282: "Scary music",
 }
@@ -61,8 +60,6 @@ def logistic_regression_model():
     lr_model.add(BatchNormalization(input_shape=(10, 128)))
     lr_model.add(Flatten())
     lr_model.add(Dense(len(mood_labels), activation='sigmoid'))
-
-    # if interested, try using different optimizers and different optimizer configs
     lr_model.compile(loss='categorical_crossentropy',
                   optimizer='adam',
                   metrics=['accuracy'])
@@ -77,8 +74,8 @@ def lstm_1layer_model():
             kernel_regularizer=regularizers.l2(0.01),
             activity_regularizer=regularizers.l2(0.01)))
     lstm_model.add(Dense(len(mood_labels), activation='softmax'))
-
-    # if interested, try using different optimizers and different optimizer configs
+    # if interested, try using different optimizers and different optimizer
+    # configs
     lstm_model.compile(loss='categorical_crossentropy',
                   optimizer='adam',
                   metrics=['accuracy'])
@@ -111,8 +108,8 @@ def lstm_3layer_model():
             activity_regularizer=regularizers.l2(0.01)))
 
     lstm3_model.add(Dense(len(mood_labels), activation='softmax'))
-    
-    # if interested, try using different optimizers and different optimizer configs
+    # if interested, try using different optimizers and different optimizer
+    # configs
     lstm3_model.compile(loss='categorical_crossentropy',
                   optimizer='adam',
                   metrics=['accuracy'])
@@ -146,8 +143,10 @@ def nn_model():
     #nn_model.add(Flatten())
     ##nn_model.add(Dense(len(mood_labels), activation='relu'))
     #nn_model.add(Dense(len(mood_labels), activation='softmax'))
-
-    # if interested, try using different optimizers and different optimizer configs
+    # if interested, try using different optimizers and different optimizer #
+    # configs
+    # if interested, try using different optimizers and different optimizer
+    # configs
     model.compile(loss='categorical_crossentropy',
                   optimizer='adam',
                   metrics=['accuracy'])
@@ -233,29 +232,35 @@ def load_records(tf_infile):
 
     for i in range(4):
         sz = len(classes[i])
-        split = int((1-CV_frac) * sz)
+        split = int((1 - CV_frac) * sz)
         train += classes[i][0:split]
         test += classes[i][split:]
-
     np.random.shuffle(train)
     np.random.shuffle(test)
     return [train, test]
 
-def show_confusion_matrix(model, records):
+def show_confusion_matrix(records, model, title):
     predictions = model.predict_on_batch(np.asarray([r[0] for r in records]))
-    conf = sklearn.metrics.confusion_matrix([r[1] for r in records], [np.argmax(p) for p in predictions])
-    print("Confusion matrix:")
+    actual_class = [r[1] for r in records]
+    predicted_class = [np.argmax(p) for p in predictions]
+    correct = np.sum([p == a for (p,a) in zip(actual_class, predicted_class)])
+    accuracy = correct / len(actual_class)
+    conf = sklearn.metrics.confusion_matrix([r[1] for r in records], predicted_class)
+    print("Test Results on model '" + title + "':")
+    print("Accuracy: %.3f" % accuracy)
+    print(" Confusion matrix:")
     print(conf)
-    np.savetxt('confusion_baseline_raw.txt', conf)
+    np.savetxt('confusion_baseline_' + title + '_raw.txt', conf)
     conf = conf / len(records)
+    print(" Confusion matrix by percentage:")
     print(conf)
-    np.savetxt('confusion_baseline_percent.txt', conf)
+    np.savetxt('confusion_baseline_' + title + '_percent.txt', conf)
+    print()
 
 def main():
 
     # choose an input file by commenting in/out
     input_file = 'moods_unbalanced_100each.tfrecord'
-    #input_file = 'moods_balanced_subset_401recs.tfrecord'
 
     (train_records, validate_records) = load_records(input_file)
     num_records = len(train_records) + len(validate_records)
@@ -263,27 +268,20 @@ def main():
     print_label_stats("train", train_records)
     print_label_stats("validate", validate_records)
 
-    # train, or load model...comment out/in as desired.
-    train = True
-    if train:
-        # pick a model by changing the function on the next line
-        models = [logistic_regression_model(), lstm_1layer_model(), lstm_3layer_model()]
-        epochs = [100, 100, 200]
-        results = []
-        for (m,e) in zip(models, epochs):
-            plot_model(m[0], to_file=m[1]+'_model.png')
-            results.append(train_model(m[0], train_records, validate_records, 40, 40, e))
-    else:
-        infile = '3-layer LSTM_most_recent.h5'
-        print("Loading model: " + infile)
-        model = keras.models.load_model(infile)
+    # train 3 models
+    models = [logistic_regression_model(), lstm_1layer_model(), lstm_3layer_model()]
+    epochs = [100, 100, 200]
+    results = []
+    for (m,e) in zip(models, epochs):
+        results.append(train_model(m[0], train_records, validate_records, 40, 40, e))
 
+    plot_epochs(results, models)
 
-    if train:
-        plot_epochs(results, models)
-    show_confusion_matrix(models[-1][0], validate_records)
-
+    # test against balanced 220 set
+    (t1, t2) = load_records("moods_balanced_220.tfrecord")
+    test_records = t1 + t2
+    for m in models:
+        show_confusion_matrix(test_records, m[0], m[1])
 
 if __name__ == "__main__":
     main()
-
