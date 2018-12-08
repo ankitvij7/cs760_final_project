@@ -7,6 +7,7 @@ from keras.models import Sequential
 from keras.layers import Dense, BatchNormalization, Flatten, Dropout
 from keras.layers import LSTM, MaxPooling1D, Conv1D
 from keras import regularizers
+from keras.utils import plot_model
 import sklearn.metrics
 
 # validation set will be 10% of total set
@@ -81,7 +82,7 @@ def lstm_1layer_model():
     lstm_model.compile(loss='categorical_crossentropy',
                   optimizer='adam',
                   metrics=['accuracy'])
-    return (lstm_model, 'LSTM 1-Layer')
+    return (lstm_model, '1-Layer LSTM')
 
 def lstm_3layer_model():
     ''' Creates a 3 layer LSTM model. Used as input to train_model() '''
@@ -270,6 +271,7 @@ def main():
         epochs = [100, 100, 200]
         results = []
         for (m,e) in zip(models, epochs):
+            plot_model(m[0], to_file=m[1]+'_model.png')
             results.append(train_model(m[0], train_records, validate_records, 40, 40, e))
     else:
         infile = '3-layer LSTM_most_recent.h5'
