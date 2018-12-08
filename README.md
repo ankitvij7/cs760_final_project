@@ -32,6 +32,7 @@ keras | **2.2.4**
 matplotlib | **3.0.2**
 soundfile | **0.10.2**
 resampy | **0.2.1**
+scikit-learn | **0.20.1**
 
 Instructions on how to install TensorFlow using pip:
 * https://www.tensorflow.org/install/pip
