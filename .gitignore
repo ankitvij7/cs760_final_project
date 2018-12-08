@@ -126,3 +126,8 @@ dataset/moods_unbalanced_subset_error.txt
 dataset/ffmpeg.exe
 dataset/ffprobe.exe
 
+#vggish code base
+src/vggish_model_original.ckpt
+src/vggish_model.ckpt
+src/vggish_pca_params_original.npz
+src/vggish_pca_params.npz

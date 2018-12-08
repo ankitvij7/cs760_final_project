@@ -19,6 +19,12 @@ The following files are used:
 
 This data is quite large so download them to your local disk and place them in the above directories.
 
+Additional data needed for running the waves.
+* `src/vggish_model.ckpt` 
+  * get large file from https://storage.googleapis.com/audioset/vggish_model.ckpt
+* `src/vggish_pca_params.npz` 
+  * get small file from https://storage.googleapis.com/audioset/vggish_pca_params.npz
+
 
 # Tools:
 Major packages have sub-dependencies ignored for brevity:
