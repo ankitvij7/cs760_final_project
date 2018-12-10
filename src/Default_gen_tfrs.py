@@ -28,12 +28,12 @@ def run_gen(input_file, input_wav_prefix, output_tfr_prefix):
 # Let's do our 2 sets of calculations.
 bal_input_file = '../dataset/moods_balanced.csv'
 bal_input_wav_prefix = 'wav_outputs_balanced/'
-bal_output_tfr_prefix = '../dataset/audioset_v1_embeddings/bal_train_gen1/'
+bal_output_tfr_prefix = '../dataset/audioset_v1_embeddings/bal_train_gen2/'
 run_gen(bal_input_file, bal_input_wav_prefix, bal_output_tfr_prefix)
 
 unbal_input_file = '../dataset/moods_unbalanced_100each.csv'
 unbal_input_wav_prefix = 'wav_outputs_unbalanced/'
-unbal_output_tfr_prefix = '../dataset/audioset_v1_embeddings/unbal_train_gen1/'
+unbal_output_tfr_prefix = '../dataset/audioset_v1_embeddings/unbal_train_gen2/'
 run_gen(unbal_input_file, unbal_input_wav_prefix, unbal_output_tfr_prefix)
 
 
