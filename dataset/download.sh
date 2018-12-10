@@ -7,8 +7,8 @@ fetch_clip() {
   echo "Fetching $1 ..."
   outname="$1_$2"
   echo "Building $outname"
-  if [ -f "wav_outputs_balanced/${outname}.wav.gz" ]; then
-    echo "Already have it."
+  if [ -f "wav_outputs_eval/${outname}.wav.gz" ]; then
+    echo "Already have it   $1  with label   $5"
     return
   fi
 
@@ -25,7 +25,7 @@ fetch_clip() {
     mv "./${outname}_out.wav" "./$outname.wav"
     echo "Compressing $outname.wav ..."
     gzip "./$outname.wav"
-    mv "./$outname.wav.gz" "./wav_outputs_balanced/$outname.wav.gz"
+    mv "./$outname.wav.gz" "./wav_outputs_eval/$outname.wav.gz"
   else
     # Give the user a chance to Ctrl+C.
     sleep 1
