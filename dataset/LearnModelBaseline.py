@@ -277,8 +277,8 @@ def main():
 
     plot_epochs(results, models)
 
-    # test against balanced 220 set
-    (t1, t2) = load_records("moods_balanced_220.tfrecord")
+    # test against eval 223 set
+    (t1, t2) = load_records("moods_eval_223.tfrecord")
     test_records = t1 + t2
     for m in models:
         show_confusion_matrix(test_records, m[0], m[1])

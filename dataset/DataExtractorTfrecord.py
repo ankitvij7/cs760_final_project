@@ -54,7 +54,10 @@ def do_it():
     print(moods)
     #build_tfrecords_for_moods('balanced_train_segments.csv', 'moods_balanced_subset.tfrecord', 'audioset_v1_embeddings/bal_train/')
     #build_tfrecords_for_moods('unbalanced_train_segments.csv', 'moods_unbalanced_subset.tfrecord', 'audioset_v1_embeddings/unbal_train/')
-    build_tfrecords_for_moods('moods_unbalanced_100each.csv', 'moods_unbalanced_100each.tfrecord', 'audioset_v1_embeddings/unbal_train/')
-    build_tfrecords_for_moods('moods_balanced.csv', 'moods_balanced_220.tfrecord', 'audioset_v1_embeddings/bal_train/')
+  
+    #build_tfrecords_for_moods('moods_unbalanced_100each.csv', 'moods_unbalanced_100each.tfrecord', 'audioset_v1_embeddings/unbal_train/')
+    #build_tfrecords_for_moods('moods_balanced.csv', 'moods_balanced_220.tfrecord', 'audioset_v1_embeddings/bal_train/')
+    
+    build_tfrecords_for_moods('moods_eval.csv', 'moods_eval.tfrecord', 'audioset_v1_embeddings/eval/')
 
 do_it()

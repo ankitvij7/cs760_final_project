@@ -95,7 +95,7 @@ Works we plan to cite (to make sure bibtex is working):
 
 \subsection{Data Acquisition and Extraction}
 
-We collected our data from Google’s AudioSet \cite{audioset} which consists of an expanding ontology of 632 audio event classes and a collection of 2,084,320 human-labeled 10-second sound clips drawn from YouTube videos. The ontology is specified as a hierarchical graph of event categories, covering a wide range of human and animal sounds, musical instruments and genres, and common everyday environmental sounds. From the dataset, we focussed on music mood samples and extracted data points with 4 mood classes- Happy, Sad, Angry, and Scary. The dataset had two groups, balanced and unbalanced set. We created a \texttt{.csv} of 220 data points with their labels from the balanced set with 55 entries for each mood class. Additionally, we created a \texttt{.csv} of 400 data points with their labels from the unbalanced set with 100 entries for each mood class. These CSVs were then used to for two purposes:
+We collected our data from Google’s AudioSet \cite{audioset} which consists of an expanding ontology of 632 audio event classes and a collection of 2,084,320 human-labeled 10-second sound clips drawn from YouTube videos. The ontology is specified as a hierarchical graph of event categories, covering a wide range of human and animal sounds, musical instruments and genres, and common everyday environmental sounds. From the dataset, we focussed on music mood samples and extracted data points with 4 mood classes- Happy, Sad, Angry, and Scary. The dataset had two groups, `unbalanced' and `evaluation' set (We used the `unbalanced' data set because the `balanced' data set was too small for our needs). We created a \texttt{.csv} of 223 data points with their labels from the `evaluation' set with \~56 entries for each mood class. Additionally, we created a \texttt{.csv} of 400 data points with their labels from the `unbalanced' set with 100 entries for each mood class. These CSVs were then used to for two purposes:
 \begin{enumerate}
 \item Download the corresponding Google-produced spectrographs of each of the samples for use in establishing a baseline classification accuracy.
 \item Download the audio samples in .WAV format directly from their source (YouTube) which we used in the pre-processing step described in the next section.
@@ -104,7 +104,7 @@ We collected our data from Google’s AudioSet \cite{audioset} which consists of
 
 \subsection{Baseline}
 
-To establish a baseline for the achievable accuracy in learning a  multi-class classification task, we began by using the spectrographs for the 400 + 220 data instances we identified as a) being music audio, and b) having one of the 4 mood labels we chose for analysis.
+To establish a baseline for the achievable accuracy in learning a  multi-class classification task, we began by using the spectrographs for the 400 + 223 data instances we identified as a) being music audio, and b) having one of the 4 mood labels we chose for analysis.
 
 To evaluate this baseline, Python was used, enlisting the libraries TensorFlow \cite{tensorflow} and Keras \cite{keras}.
 
@@ -119,7 +119,7 @@ In each case, the model was trained using batches of 40 samples, randomized at e
 We evaluated the performance of each of the 3 models by two methods:
 \begin{enumerate}
 \item Validation set accuracy over an increasing number of epochs.
-\item Evaluation on a Test Set of 220 never-seen-before data instances.
+\item Evaluation on a Test Set of 223 never-seen-before data instances (\texttt{audioset/eval}).
 \end{enumerate}
 
 The performance of the training sessions is shown in figure \ref{fig:baseline_train}.
@@ -140,9 +140,9 @@ After training, the evaluation on  the 220-instance balanced test set, we observ
 \hline
 Model & Accuracy \\ 
 \midrule
-Logistic Regression & 0.859 \\
-1-Layer LSTM & 0.864 \\ 
-3-Layer LSTM & 0.814 \\ 
+Logistic Regression & 0.803 \\
+1-Layer LSTM & 0.830 \\ 
+3-Layer LSTM & 0.731 \\ 
 \bottomrule
 \end{tabular}
 \end{table}
@@ -150,7 +150,7 @@ Logistic Regression & 0.859 \\
 Finally, to make sure that our four chosen classes do not have an abnormal correlation between any combinations of classes, we also computed confusion matrices for the models. The confusion matrix for Logistic Regression (arguably the best performing classifier) is shown in table \ref{tbl:baseline_conf}.
 
 \begin{table}[] 
-\caption{Confusion matrix for baseline logistic regression classifier of 220 test instances.}
+\caption{Confusion matrix for baseline logistic regression classifier of 223 test instances.}
 \label{tbl:baseline_conf}
 \centering
 \begin{tabular}{lcccc} 
@@ -158,10 +158,10 @@ Finally, to make sure that our four chosen classes do not have an abnormal corre
 \hline
  & Happy & Sad & Angry & Scary \\ 
 \midrule
-Happy & 46 & 11 & 1 & 0 \\
-Sad   &  7 & 38 & 1 & 3 \\
-Angry &  0 &  0 & 55 & 4 \\
-Scary &  1 &  2 & 1 &  50 \\
+Happy & 45 &  9 & 2 & 1 \\
+Sad   &  11 & 39 & 2 & 4 \\
+Angry &  0 &  1 & 53 & 4 \\
+Scary &  0 &  7 & 3 &  42 \\
 \bottomrule
 \end{tabular}
 \end{table}
