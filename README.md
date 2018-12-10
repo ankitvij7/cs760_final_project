@@ -19,6 +19,12 @@ The following files are used:
 
 This data is quite large so download them to your local disk and place them in the above directories.
 
+Additional data needed for running the waves.
+* `src/vggish_model.ckpt` 
+  * get large file from https://storage.googleapis.com/audioset/vggish_model.ckpt
+* `src/vggish_pca_params.npz` 
+  * get small file from https://storage.googleapis.com/audioset/vggish_pca_params.npz
+
 
 # Tools:
 Major packages have sub-dependencies ignored for brevity:
@@ -32,6 +38,7 @@ keras | **2.2.4**
 matplotlib | **3.0.2**
 soundfile | **0.10.2**
 resampy | **0.2.1**
+scikit-learn | **0.20.1**
 
 Instructions on how to install TensorFlow using pip:
 * https://www.tensorflow.org/install/pip
