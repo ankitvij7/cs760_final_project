@@ -139,32 +139,25 @@ def main(_):
 
             # Add a classifier layer at the end, consisting of parallel logistic
             # classifiers, one per class. This allows for multi-class tasks.
-            logits = slim.fully_connected(
-                fc, _NUM_CLASSES, activation_fn=None, scope='logits')
+            logits = slim.fully_connected(fc, _NUM_CLASSES, activation_fn=None, scope='logits')
             tf.sigmoid(logits, name='prediction')
 
             # Add training ops.
             with tf.variable_scope('train'):
-                global_step = tf.Variable(
-                    0, name='global_step', trainable=False,
-                    collections=[tf.GraphKeys.GLOBAL_VARIABLES,
-                                 tf.GraphKeys.GLOBAL_STEP])
+                global_step = tf.Variable(0, name='global_step', trainable=False,
+                                          collections=[tf.GraphKeys.GLOBAL_VARIABLES, tf.GraphKeys.GLOBAL_STEP])
 
                 # Labels are assumed to be fed as a batch multi-hot vectors, with
                 # a 1 in the position of each positive class label, and 0 elsewhere.
-                labels = tf.placeholder(
-                    tf.float32, shape=(None, _NUM_CLASSES), name='labels')
+                labels = tf.placeholder(tf.float32, shape=(None, _NUM_CLASSES), name='labels')
 
                 # Cross-entropy label loss.
-                xent = tf.nn.sigmoid_cross_entropy_with_logits(
-                    logits=logits, labels=labels, name='xent')
+                xent = tf.nn.sigmoid_cross_entropy_with_logits(logits=logits, labels=labels, name='xent')
                 loss = tf.reduce_mean(xent, name='loss_op')
                 tf.summary.scalar('loss', loss)
 
                 # We use the same optimizer and hyperparameters as used to train VGGish.
-                optimizer = tf.train.AdamOptimizer(
-                    learning_rate=vggish_params.LEARNING_RATE,
-                    epsilon=vggish_params.ADAM_EPSILON)
+                optimizer = tf.train.AdamOptimizer(learning_rate=vggish_params.LEARNING_RATE, epsilon=vggish_params.ADAM_EPSILON)
                 optimizer.minimize(loss, global_step=global_step, name='train_op')
 
         # Initialize all variables in the model, and then load the pre-trained
@@ -173,11 +166,9 @@ def main(_):
         vggish_slim.load_vggish_slim_checkpoint(sess, FLAGS.checkpoint)
 
         # Locate all the tensors and ops we need for the training loop.
-        features_tensor = sess.graph.get_tensor_by_name(
-            vggish_params.INPUT_TENSOR_NAME)
+        features_tensor = sess.graph.get_tensor_by_name(vggish_params.INPUT_TENSOR_NAME)
         labels_tensor = sess.graph.get_tensor_by_name('mymodel/train/labels:0')
-        global_step_tensor = sess.graph.get_tensor_by_name(
-            'mymodel/train/global_step:0')
+        global_step_tensor = sess.graph.get_tensor_by_name('mymodel/train/global_step:0')
         loss_tensor = sess.graph.get_tensor_by_name('mymodel/train/loss_op:0')
         train_op = sess.graph.get_operation_by_name('mymodel/train/train_op')
 
