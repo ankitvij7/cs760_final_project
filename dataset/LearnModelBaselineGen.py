@@ -278,7 +278,7 @@ def main():
     # choose an input file by commenting in/out
     # input_file = 'moods_balanced.csv'
     input_file = 'moods_unbalanced_100each.csv'
-    input_tfr_prefix = 'audioset_v1_embeddings/unbal_train_gen/'
+    input_tfr_prefix = 'audioset_v1_embeddings/unbal_train_gen1/'
 
     (train_records, validate_records) = load_records(input_file, input_tfr_prefix)
     num_records = len(train_records) + len(validate_records)
@@ -297,7 +297,7 @@ def main():
 
     # test against balanced 220 set
     test_input_file = 'moods_balanced.csv'
-    test_input_tfr_prefix = 'audioset_v1_embeddings/bal_train_gen/'
+    test_input_tfr_prefix = 'audioset_v1_embeddings/bal_train_gen1/'
     (t1, t2) = load_records(test_input_file, test_input_tfr_prefix)
     test_records = t1 + t2
     for m in models:
