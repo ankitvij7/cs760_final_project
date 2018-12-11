@@ -56,13 +56,14 @@ import vggish_params
 import vggish_postprocess
 import vggish_slim
 
-checkpoint = 'vggish_model.ckpt'
+#checkpoint = 'vggish_model.ckpt'
+checkpoint = './gen/vgg_model_gen.ckpt'
 pca_params = 'vggish_pca_params.npz'
 
 
-def vggish_inference(intput_file, output_file):
+def vggish_inference(input_file, output_file):
     # In this simple example, we run the examples from a single audio file through the model.
-    examples_batch = vggish_input.wavfile_to_examples(intput_file)
+    examples_batch = vggish_input.wavfile_to_examples(input_file)
     #print(examples_batch)
 
     # Prepare a postprocessor to munge the model embeddings.
