@@ -25,7 +25,9 @@ EMBEDDING_SIZE = 128  # Size of embedding layer.
 
 # Hyperparameters used in feature and example generation.
 SAMPLE_RATE = 16000
-STFT_WINDOW_LENGTH_SECONDS = 0.010  # Original, gen2 = 0.01 gen1 = 0.05 gen = 0.025
+#STFT_WINDOW_LENGTH_SECONDS = 0.025  # Original gen = 0.025
+#STFT_WINDOW_LENGTH_SECONDS = 0.050  # gen1 = 0.05
+STFT_WINDOW_LENGTH_SECONDS = 0.010  # gen2 = 0.01
 STFT_HOP_LENGTH_SECONDS = 0.010
 NUM_MEL_BINS = NUM_BANDS
 MEL_MIN_HZ = 125

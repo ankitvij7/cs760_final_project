@@ -278,8 +278,10 @@ def main():
     # Define out files and prefixes.
     input_file = 'moods_unbalanced_100each.csv'
     input_tfr_prefix = 'audioset_v1_embeddings/unbal_train_gen2/'
-    test_input_file = 'moods_balanced.csv'
-    test_input_tfr_prefix = 'audioset_v1_embeddings/bal_train_gen2/'
+    test_input_file = 'moods_eval.csv'
+    test_input_tfr_prefix = 'audioset_v1_embeddings/eval_gen2/'
+    #test_input_file = 'moods_balanced.csv'
+    #test_input_tfr_prefix = 'audioset_v1_embeddings/bal_train_gen2/'
 
     (train_records, validate_records) = load_records(input_file, input_tfr_prefix)
     num_records = len(train_records) + len(validate_records)

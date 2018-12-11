@@ -5,8 +5,8 @@ import csv
 input_wav_suffix = '.wav'
 output_tfr_suffix = '.tfrecord'
 
-def run_gen(input_file, input_wav_prefix, output_tfr_prefix):
 
+def run_gen(input_file, input_wav_prefix, output_tfr_prefix):
     start_time = time.time()
     with open(input_file, 'r') as csvfile:
         reader = csv.reader(csvfile, quotechar='"', delimiter=' ', quoting=csv.QUOTE_ALL, skipinitialspace=True)
@@ -25,18 +25,22 @@ def run_gen(input_file, input_wav_prefix, output_tfr_prefix):
             vggish_inference(input_wav, output_tfr)
             print("Finish, %d / %d,  %s / %s sec" % (row_cnt, num_rows, (time.time() - loop_time), (time.time() - start_time)))
 
+
 # Let's do our 2 sets of calculations.
-bal_input_file = '../dataset/moods_balanced.csv'
-bal_input_wav_prefix = 'wav_outputs_balanced/'
-bal_output_tfr_prefix = '../dataset/audioset_v1_embeddings/bal_train_gen2/'
-run_gen(bal_input_file, bal_input_wav_prefix, bal_output_tfr_prefix)
+eval_input_file = '../dataset/moods_eval.csv'
+eval_input_wav_prefix = 'wav_outputs_eval/'
+eval_output_tfr_prefix = '../dataset/audioset_v1_embeddings/eval_gen2/'
+run_gen(eval_input_file, eval_input_wav_prefix, eval_output_tfr_prefix)
 
 unbal_input_file = '../dataset/moods_unbalanced_100each.csv'
 unbal_input_wav_prefix = 'wav_outputs_unbalanced/'
 unbal_output_tfr_prefix = '../dataset/audioset_v1_embeddings/unbal_train_gen2/'
 run_gen(unbal_input_file, unbal_input_wav_prefix, unbal_output_tfr_prefix)
 
-
+# bal_input_file = '../dataset/moods_balanced.csv'
+# bal_input_wav_prefix = 'wav_outputs_balanced/'
+# bal_output_tfr_prefix = '../dataset/audioset_v1_embeddings/bal_train_gen2/'
+# run_gen(bal_input_file, bal_input_wav_prefix, bal_output_tfr_prefix)
 
 # Take 1
 # import tensorflow as tf
