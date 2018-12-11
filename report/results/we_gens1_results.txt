@@ -1,0 +1,38 @@
+Test Results on model 'Multiclass Logistic Regression':
+Accuracy: 0.269
+ Confusion matrix:
+[[ 0  0 57  0]
+ [ 0  0 55  0]
+ [ 0  0 58  0]
+ [ 0  0 51  2]]
+ Confusion matrix by percentage:
+[[0.         0.         0.25560538 0.        ]
+ [0.         0.         0.24663677 0.        ]
+ [0.         0.         0.26008969 0.        ]
+ [0.         0.         0.22869955 0.00896861]]
+
+Test Results on model '1-Layer LSTM':
+Accuracy: 0.265
+ Confusion matrix:
+[[57  0  0  0]
+ [55  0  0  0]
+ [58  0  0  0]
+ [51  0  0  2]]
+ Confusion matrix by percentage:
+[[0.25560538 0.         0.         0.        ]
+ [0.24663677 0.         0.         0.        ]
+ [0.26008969 0.         0.         0.        ]
+ [0.22869955 0.         0.         0.00896861]]
+
+Test Results on model '3-layer LSTM':
+Accuracy: 0.260
+ Confusion matrix:
+[[ 0  0 57  0]
+ [ 0  0 55  0]
+ [ 0  0 58  0]
+ [ 0  0 53  0]]
+ Confusion matrix by percentage:
+[[0.         0.         0.25560538 0.        ]
+ [0.         0.         0.24663677 0.        ]
+ [0.         0.         0.26008969 0.        ]
+ [0.         0.         0.23766816 0.        ]]

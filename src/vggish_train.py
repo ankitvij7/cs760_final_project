@@ -88,12 +88,15 @@ def get_examples_batch(batch_num, num_batches):
         # print(len(labeled_examples))
         # print(features[0].shape)
         # print(labels[0].shape)
+        # print(features[5])
+        # print(labels[5])
         return (features, labels)
 
 
 def vggish_train(checkpoint, num_batches):
     with tf.Graph().as_default(), tf.Session() as sess:
         # Define VGGish.
+        #TODO: Trye with False for slim.
         embeddings = vggish_slim.define_vggish_slim(True)  # Train the model.
 
         # Define a shallow classification model and associated training ops on top of VGGish.
@@ -127,8 +130,10 @@ def vggish_train(checkpoint, num_batches):
 
         # Initialize all variables in the model, and then create a saver.
         sess.run(tf.global_variables_initializer())
-        saver = tf.train.Saver()
-        # vggish_slim.load_vggish_slim_checkpoint(sess, checkpoint)
+        # saver = tf.train.Saver()
+        vggish_var_names = [v.name for v in tf.global_variables()]
+        vggish_vars = [v for v in tf.global_variables() if v.name in vggish_var_names]
+        saver = tf.train.Saver(vggish_vars, name='vggish_load_pretrained', write_version=1)
 
         # Locate all the tensors and ops we need for the training loop.
         features_tensor = sess.graph.get_tensor_by_name(vggish_params.INPUT_TENSOR_NAME)
@@ -153,7 +158,7 @@ def vggish_train(checkpoint, num_batches):
 # checkpoint = "vgg_model_gen.ckpt"
 # num_batches = 30
 # vggish_train('./gen/vgg_model_gen.ckpt', 20)
-vggish_train('./checkpoint/gens/vgg_model_gen.ckpt', 400)
+vggish_train('./checkpoint/gens1/vgg_model_gen.ckpt', 400)
 # vggish_train('./vgg_model_gen.ckpt', 1)
 # get_examples_batch(1, 20)
 # _get_examples_batch()

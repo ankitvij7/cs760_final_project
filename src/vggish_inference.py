@@ -58,7 +58,8 @@ import vggish_slim
 
 # checkpoint = 'vggish_model.ckpt'
 # checkpoint = './checkpoint/gen/vgg_model_gen.ckpt'
-checkpoint = './checkpoint/gens/vgg_model_gen.ckpt'
+# checkpoint = './checkpoint/gens/vgg_model_gen.ckpt'
+checkpoint = './checkpoint/gens1/vgg_model_gen.ckpt'
 pca_params = 'vggish_pca_params.npz'
 
 
