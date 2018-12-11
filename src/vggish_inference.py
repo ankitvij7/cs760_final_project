@@ -56,15 +56,16 @@ import vggish_params
 import vggish_postprocess
 import vggish_slim
 
-#checkpoint = 'vggish_model.ckpt'
-checkpoint = './gen/vgg_model_gen.ckpt'
+# checkpoint = 'vggish_model.ckpt'
+# checkpoint = './checkpoint/gen/vgg_model_gen.ckpt'
+checkpoint = './checkpoint/gens/vgg_model_gen.ckpt'
 pca_params = 'vggish_pca_params.npz'
 
 
 def vggish_inference(input_file, output_file):
     # In this simple example, we run the examples from a single audio file through the model.
     examples_batch = vggish_input.wavfile_to_examples(input_file)
-    #print(examples_batch)
+    # print(examples_batch)
 
     # Prepare a postprocessor to munge the model embeddings.
     pproc = vggish_postprocess.Postprocessor(pca_params)
@@ -81,9 +82,9 @@ def vggish_inference(input_file, output_file):
 
         # Run inference and postprocessing.
         [embedding_batch] = sess.run([embedding_tensor], feed_dict={features_tensor: examples_batch})
-        #print(embedding_batch)
+        # print(embedding_batch)
         postprocessed_batch = pproc.postprocess(embedding_batch)
-        #print(postprocessed_batch)
+        # print(postprocessed_batch)
 
         # Write the postprocessed embeddings as a SequenceExample, in a similar
         # format as the features released in AudioSet. Each row of the batch of
@@ -105,7 +106,7 @@ def vggish_inference(input_file, output_file):
                 }
             )
         )
-        #print(seq_example)
+        # print(seq_example)
         if writer:
             writer.write(seq_example.SerializeToString())
 

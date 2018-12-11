@@ -277,9 +277,9 @@ def show_confusion_matrix(records, model, title):
 def main():
     # Define out files and prefixes.
     input_file = 'moods_unbalanced_100each.csv'
-    input_tfr_prefix = 'audioset_v1_embeddings/unbal_train_we_gen/'
+    input_tfr_prefix = 'audioset_v1_embeddings/unbal_train_we_gens/'
     test_input_file = 'moods_eval.csv'
-    test_input_tfr_prefix = 'audioset_v1_embeddings/eval_we_gen/'
+    test_input_tfr_prefix = 'audioset_v1_embeddings/eval_we_gens/'
     #test_input_file = 'moods_balanced.csv'
     #test_input_tfr_prefix = 'audioset_v1_embeddings/bal_train_gen2/'
 
