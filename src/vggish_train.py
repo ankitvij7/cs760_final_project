@@ -96,7 +96,7 @@ def get_examples_batch(batch_num, num_batches):
 def vggish_train(checkpoint, num_batches):
     with tf.Graph().as_default(), tf.Session() as sess:
         # Define VGGish.
-        #TODO: Trye with False for slim.
+        #TODO: Try with False for slim.
         embeddings = vggish_slim.define_vggish_slim(True)  # Train the model.
 
         # Define a shallow classification model and associated training ops on top of VGGish.
@@ -131,7 +131,9 @@ def vggish_train(checkpoint, num_batches):
         # Initialize all variables in the model, and then create a saver.
         sess.run(tf.global_variables_initializer())
         # saver = tf.train.Saver()
-        vggish_var_names = [v.name for v in tf.global_variables()]
+        with tf.Graph().as_default():
+            vggish_slim.define_vggish_slim(False)
+            vggish_var_names = [v.name for v in tf.global_variables()]
         vggish_vars = [v for v in tf.global_variables() if v.name in vggish_var_names]
         saver = tf.train.Saver(vggish_vars, name='vggish_load_pretrained', write_version=1)
 
