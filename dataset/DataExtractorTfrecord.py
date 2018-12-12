@@ -22,7 +22,6 @@ def get_record_from(filename, label):
         tf_example = tf.train.SequenceExample.FromString(string_record)
         vid_id = tf_example.context.feature['video_id'].bytes_list.value[0].decode(encoding = 'UTF-8')
         if vid_id == label:
-            print('found record ', vid_id, ' in file ', filename)
             return tf_example
         
     return None

@@ -44,17 +44,17 @@
   Joel Haynie \\
   Department of Computer Sciences\\
   University of Wisconsin, Madison\\
-  \texttt{email@wisc.edu} \\
+  \texttt{jhaynie@wisc.edu} \\
   \And
   Ankit Vij \\
   Department of Computer Sciences\\
   University of Wisconsin, Madison\\
-  \texttt{email@wisc.edu} \\
+  \texttt{vij2@wisc.edu} \\
   \AND
   Amanpreet Singh Saini \\
   Department of Computer Sciences\\
   University of Wisconsin, Madison\\
-  \texttt{email@wisc.edu} \\
+  \texttt{saini5@wisc.edu} \\
   \And
   Eric Brandt \\
   Department of Computer Sciences\\
@@ -68,15 +68,10 @@
 \maketitle
 
 \begin{abstract}
-  The abstract paragraph should be indented \nicefrac{1}{2}~inch
-  (3~picas) on both the left- and right-hand margins. Use 10~point
-  type, with a vertical spacing (leading) of 11~points.  The word
-  \textbf{Abstract} must be centered, bold, and in point size 12. Two
-  line spaces precede the abstract. The abstract must be limited to
-  one paragraph.
+Classification of audio samples is an application of deep learning that is receiving considerable attention today. Our project involves investigating this specialized area of machine learning in detail. First, we explore the background and theoretical basis for audio sample classification using deep learning methods. Second, we implement and train a practical proof-of-concept application that classifies musical samples into one of four ‘moods’ with test results. Finally, we comment on emerging research topics in audio classification using deep neural networks.
 \end{abstract}
 
-\section{Background}
+\section{Motivation and Theoretical Basis}{sec:theory}
 
 Works we plan to cite (to make sure bibtex is working): 
 \begin{itemize}
@@ -91,25 +86,47 @@ Works we plan to cite (to make sure bibtex is working):
 \item TensorFlow \cite{tensorflow}
 \item Keras \cite{keras}
 \end{itemize}
+
+\subsection{Preprocessing}
+
+TODO
+
+\subsection{CNN Training}
+
+TODO
+
+\begin{figure}[]
+	\centering
+	\includegraphics[width=1.0\textwidth]{Rothmann_Flow.png}  
+	\caption{Rothmann's	\cite{rothmann} ML model of human hearing}
+	\label{fig:rothman_flow}
+\end{figure}
+
+\begin{figure}[]
+	\centering
+	\includegraphics[width=1.0\textwidth]{VGG Flow.png}  
+	\caption{Hershey \cite{hershey} model of converting \texttt{.wav} audio to features suitable for ML}
+	\label{fig:vgg_flow}
+\end{figure}
 	
-\section{Implementation}
+\section{Practical Implementation}
 
 \subsection{Data Acquisition and Extraction}
 
-We collected our data from Google’s AudioSet \cite{audioset} which consists of an expanding ontology of 632 audio event classes and a collection of 2,084,320 human-labeled 10-second sound clips drawn from YouTube videos. The ontology is specified as a hierarchical graph of event categories, covering a wide range of human and animal sounds, musical instruments and genres, and common everyday environmental sounds. From the dataset, we focussed on music mood samples and extracted data points with 4 mood classes- Happy, Sad, Angry, and Scary. The dataset had two groups, `unbalanced' and `evaluation' set (We used the `unbalanced' data set because the `balanced' data set was too small for our needs). We created a \texttt{.csv} of 223 data points with their labels from the `evaluation' set with $\sim 56$ entries for each mood class. Additionally, we created a \texttt{.csv} of 400 data points with their labels from the `unbalanced' set with 100 entries for each mood class. These CSVs were then used to for two purposes:
-\begin{enumerate}
-\item Download the corresponding Google-produced spectrographs of each of the samples for use in establishing a baseline classification accuracy.
-\item Download the audio samples in .WAV format directly from their source (YouTube) which we used in the pre-processing step described in the next section.
-\end{enumerate}
+We collected our data from Google’s AudioSet \cite{audioset} which consists of an expanding ontology of 632 audio event classes and a collection of 2,084,320 human-labeled 10-second sound clips drawn from YouTube videos. The ontology is specified as a hierarchical graph of event categories, covering a wide range of human and animal sounds, musical instruments and genres, and common everyday environmental sounds. From the dataset, we focused on music mood samples and extracted data instances having labels of four mood classes- \textit{Happy}, \textit{Sad}, \textit{Angry}, and \textit{Scary}. The dataset selected was divided into two groups: training and evaluation. 
 
+To form our data sets, filtered from the ontology two sets: First, a set of 400 instances with our corresponding labels for training. Of these 400, we ensured we chose 100 entries of each mood classification. The second set contained 223 data points with ~56 instances per label which we used for evaluating our models. To avoid contamination, these 223 data instances were held aside during training and not introduced to the model until the evaluation stage. We created \texttt{.csv} files containing, for each instance, the YouTube video ID, start and stop times within the video, and the label associated with the instance. These \texttt{.csv}s were then used to run a batch processing script to download the audio samples in \texttt{.wav} format directly from their source (YouTube).
 
-\subsection{Baseline}
+\subsection{Transformation to Features}
+The next step in the application’s pipeline is to transform the raw \texttt{.wav} files into features that can be input into a classifier network. This is done via the process described above in section \ref{sec:theory}, using an open source TensorFlow model called VGGish \cite{vggish}. We made initial attempts to implement this layer ourselves, but the training required for the CNN to achieve suitable results is beyond the computational capacity of our local workstations. In this instance, to ‘see further, we stood on the shoulders of giants\cite{newton}’ (in this case, Google) and used the pre-trained CNN model to feature-ize the \texttt{.wav} files. We converted each of our 400+223 \texttt{.wav} file instances using VGGish to 128x10 element feature vectors.
 
-To establish a baseline for the achievable accuracy in learning a  multi-class classification task, we began by using the spectrographs for the 400 + 223 data instances we identified as a) being music audio, and b) having one of the 4 mood labels we chose for analysis.
+\subsection{Classification}
 
-To evaluate this baseline, Python was used, enlisting the libraries TensorFlow \cite{tensorflow} and Keras \cite{keras}.
+After initial processing of the wav files into feature vectors (matrices) of dimension 128x10 we investigated different models to perform the multi-class classification task of predicting the ‘mood’ of the music from the feature vector.
 
-The 400 samples were evenly divided by class for stratified k-fold cross validation and used to train 3 different neural networks:
+To evaluate different classification models, Python was used enlisting the libraries TensorFlow\cite{tensorflow} and Keras\cite{keras}.
+
+The 400 training samples were evenly divided by class for stratified cross validation and used to train 3 different neural networks:
 \begin{enumerate}
 \item Simple multi-class logistic regression classifier
 \item 1-Layer LSTM (Long-short term memory) recurrent neural network
@@ -119,8 +136,8 @@ In each case, the model was trained using batches of 40 samples, randomized at e
 
 We evaluated the performance of each of the 3 models by two methods:
 \begin{enumerate}
-\item Validation set accuracy over an increasing number of epochs.
-\item Evaluation on a Test Set of 223 never-seen-before data instances (\texttt{audioset/eval}).
+\item Validation set accuracy over an increasing number of epochs, to watch for over-training and the any generalization gap.
+\item Evaluation on a Test Set of 220 never-seen-before data instances.
 \end{enumerate}
 
 The performance of the training sessions is shown in figure \ref{fig:baseline_train}.
@@ -178,13 +195,9 @@ From the baseline evaluation we can draw some conclusions and inferences:
 \end{itemize}
 
 
-\subsection{Preprocessing}
-
-\subsection{CNN Training}
-
-\section{Discussion}
-
 \section{Conclusion}
+
+\subsection{Discussion}
 
 \subsection{Future Work}
   
