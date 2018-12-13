@@ -68,10 +68,10 @@
 \maketitle
 
 \begin{abstract}
-Classification of audio samples is an application of deep learning that is receiving considerable attention today. Our project involves investigating this specialized area of machine learning in detail. First, we explore the background and theoretical basis for audio sample classification using deep learning methods. Second, we implement and train a practical proof-of-concept application that classifies musical samples into one of four ‘moods’ with test results. Finally, we comment on emerging research topics in audio classification using deep neural networks.
+Classification of audio samples is an application of deep learning that is receiving considerable attention today. Our project involves investigating this specialized area of machine learning in detail. First, we explore the background and theoretical basis for audio sample classification using deep learning methods. Second, we implement and train a practical proof-of-concept application that classifies musical samples into one of four ‘moods’ and report test. Finally, we comment on emerging research topics in audio classification using deep neural networks.
 \end{abstract}
 
-\section{Motivation and Theoretical Basis}{sec:theory}
+\section{Motivation and Theoretical Basis}\label{sec:theory}
 
 Works we plan to cite (to make sure bibtex is working): 
 \begin{itemize}
@@ -87,14 +87,6 @@ Works we plan to cite (to make sure bibtex is working):
 \item Keras \cite{keras}
 \end{itemize}
 
-\subsection{Preprocessing}
-
-TODO
-
-\subsection{CNN Training}
-
-TODO
-
 \begin{figure}[]
 	\centering
 	\includegraphics[width=1.0\textwidth]{Rothmann_Flow.png}  
@@ -108,6 +100,22 @@ TODO
 	\caption{Hershey \cite{hershey} model of converting \texttt{.wav} audio to features suitable for ML}
 	\label{fig:vgg_flow}
 \end{figure}
+
+\subsection{Preprocessing}\label{sec:preprocessing}
+
+TODO
+
+\subsection{CNN Training}\label{sec:cnntraining}
+
+TODO
+
+
+\begin{figure}[]
+	\centering
+	\includegraphics[width=1.0\textwidth]{vggish_cnn_3.png}  
+	\caption{Deep network layers of the VGGish Convolutional Neural Network}
+	\label{fig:vggish_cnn}
+\end{figure}
 	
 \section{Practical Implementation}
 
@@ -115,10 +123,10 @@ TODO
 
 We collected our data from Google’s AudioSet \cite{audioset} which consists of an expanding ontology of 632 audio event classes and a collection of 2,084,320 human-labeled 10-second sound clips drawn from YouTube videos. The ontology is specified as a hierarchical graph of event categories, covering a wide range of human and animal sounds, musical instruments and genres, and common everyday environmental sounds. From the dataset, we focused on music mood samples and extracted data instances having labels of four mood classes- \textit{Happy}, \textit{Sad}, \textit{Angry}, and \textit{Scary}. The dataset selected was divided into two groups: training and evaluation. 
 
-To form our data sets, filtered from the ontology two sets: First, a set of 400 instances with our corresponding labels for training. Of these 400, we ensured we chose 100 entries of each mood classification. The second set contained 223 data points with ~56 instances per label which we used for evaluating our models. To avoid contamination, these 223 data instances were held aside during training and not introduced to the model until the evaluation stage. We created \texttt{.csv} files containing, for each instance, the YouTube video ID, start and stop times within the video, and the label associated with the instance. These \texttt{.csv}s were then used to run a batch processing script to download the audio samples in \texttt{.wav} format directly from their source (YouTube).
+To form our data sets, we filtered two disjoint sets from the ontology: First, a set of 400 instances with our corresponding labels for training. Of these 400, we ensured we chose 100 entries of each mood classification. The second set contained 223 data points with ~56 instances per label which we used for evaluating our models. To avoid contamination, these 223 data instances were held aside during training and not introduced to the model until the evaluation stage. We created \texttt{.csv} files containing, for each instance, the YouTube video ID, start and stop times within the video, and the label associated with the instance. These \texttt{.csv}s were then used to run a batch processing script to download the audio samples in \texttt{.wav} format directly from their source (YouTube).
 
 \subsection{Transformation to Features}
-The next step in the application’s pipeline is to transform the raw \texttt{.wav} files into features that can be input into a classifier network. This is done via the process described above in section \ref{sec:theory}, using an open source TensorFlow model called VGGish \cite{vggish}. We made initial attempts to implement this layer ourselves, but the training required for the CNN to achieve suitable results is beyond the computational capacity of our local workstations. In this instance, to ‘see further, we stood on the shoulders of giants\cite{newton}’ (in this case, Google) and used the pre-trained CNN model to feature-ize the \texttt{.wav} files. We converted each of our 400+223 \texttt{.wav} file instances using VGGish to 128x10 element feature vectors.
+The next step in the application’s pipeline is to transform the raw \texttt{.wav} files into features that can be input into a classifier network. This is done via the process described above in sections \ref{sec:preprocessing} and \ref{sec:cnntraining}, using an open source TensorFlow model called VGGish \cite{vggish}. We made initial attempts to implement this layer ourselves, but the training required for the CNN to achieve suitable results is beyond the computational capacity of our local workstations. In this instance, `to see further, we stood on the shoulders of giants\cite{newton}’ (in this case, Google) and used the pre-trained CNN model to feature-ize the \texttt{.wav} files. We converted each of our 400+223 \texttt{.wav} file instances using VGGish to 128x10 element feature vectors.
 
 \subsection{Classification}
 
@@ -184,22 +192,19 @@ Scary &  0 &  7 & 3 &  42 \\
 \end{tabular}
 \end{table}
 
-From the baseline evaluation we can draw some conclusions and inferences:
-\begin{itemize}
-\item The input feature sets must be nearly linearly separable, as evidenced by the strong performance of the simple multiclass logistic regression classifier.
-\item Google’s preprocessing of the raw audio waveforms into 10-frame spectrographs, including processing by Google’s own CNN and PCA reduction clearly has produced data that is well separated without significant further processing.
-\item Evidence of the linearly separable feature data is supported by much more complicated non-linear classifiers (1-Layer LSTM and 3-Layer LSTM) not yielding better performance.
-\item There is evidence that the LSTM models are subject to overtraining at higher numbers of epochs.
-\item More complicated models with more parameters, particularly the 3-Layer LSTM, take significantly more time to train.
-\item The confusion matrix suggests, surprisingly, that ‘Happy’ and ‘Sad’ are the most often confused classifications, and that ‘Scary’ and ‘Angry’ are comparatively easy to predict.
-\end{itemize}
-
-
 \section{Conclusion}
 
 \subsection{Discussion}
 
+After evaluating three machine learning models- Logistic Regression, 1-Layer LSTM, and 3-Layer LSTM on the evaluation set, we can draw some important conclusions. First, the input features sets (output of VGGish) must already be nearly linearly separable, as evidenced by the strong performance of the simple multiclass logistic regression classifier. Google’s preprocessing of the raw audio waveforms into 10-frame spectrographs, including processing by Google’s own CNN and PCA reduction clearly has produced data that is well separated without significant further processing. Evidence of the linearly separable feature data is supported by the fact that much more complicated non-linear classifiers (1-Layer LSTM and 3-Layer LSTM) do not yield better performance. It is also clear that complicated models with more parameters, particularly the 3-Layer LSTM take significantly more time to train. There is evidence that the LSTM models are subject to overtraining at higher numbers of epochs, as validation set accuracy decreases somewhat with increasing number of epochs. This leads us to believe that for the practitioner who wishes to write an audio-based ML application and use AudioSet and VGGish as a `black box', he or she is likely to do very well with only a simple linear classifier at the end. Finally, specific to our data set, the confusion matrix suggests, surprisingly, that ‘Happy’ and ‘Sad’ are the most often confused classifications, and that ‘Scary’ and ‘Angry’ are comparatively easy to predict. 
+
 \subsection{Future Work}
+
+In the future, we plan to extend the capabilities and accuracy of our model and by including recent developments taking place in the field of sound recognition. Tokozume et al. \cite{tokozume} talk about Between-Class learning (BC learning) which is a novel learning method for deep sound recognition. In a similar direction to overcome undesirable behaviors such as memorization and sensitivity to adversarial examples by neural networks, Zhang et al. \cite{zhang} propose  a simple learning principle called mixup which trains a neural network on convex combinations of pairs of examples and their label. Creating a new feature space by combining sounds from different classes, like suggested by BC Learning and Mixup, would not only provide variations in feature space, remove sensitivity to adversarial examples, but will also regularize the positional relationship between the class feature distributions. The results from the two papers also show that the model provides better performance, so exploring this direction could provide better accuracy in mood detection from audio. 
+
+Another direction that is also very appealing is the use of speaker adaptation and regularization techniques for neural networks for sound recognition. Tomashenko et al. \cite{tomashenko} propose a novel way to improve speaker adaptive training for neural network acoustic models using GMM derived features for automatic speech recognition. Taking inspiration from this work, we can also extend our system to detect mood from user’s speech using the techniques as suggested by Tomashenko et al. which will improve its capabilities of mood detection beyond music. 
+
+Additionally, the detection of mood from audio signals can be put to use for various recommendation systems. One possible application is the mood based song recommendation service and another could be targeted product recommendation based on inferred mood of the listener. There could be other possible applications like depression detection systems based on the user’s choice of audio playlists etc.  
   
 \bibliography{Bibliography} 
 \bibliographystyle{plainnat}
